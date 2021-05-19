@@ -1,7 +1,7 @@
 {
   "name": "InvolveMe basic unit test",
   "description": "Our basic unit test runner for Laravel applications",
-  "iconName": "example-icon",
+  "iconName": "logo-involveme",
   "categories": [
     "Php"
   ]
