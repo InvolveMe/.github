@@ -1,0 +1,36 @@
+name: CI
+on:
+  push:
+    branches-ignore: [develop, master]
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          tools: pecl
+          extensions: bcmath, ctype, fileinfo, json, mbstring, openssl, pdo, tokenizer, xml, exif, gd
+          coverage: none
+      - name: PHP version
+        run: php -v
+      - name: Prepare the environment
+        run: cp .env.testing .env
+      - name: start Database
+        run: sudo systemctl start mysql
+      - name: Create Database
+        run: mysql --user="root" --password="root" -e "CREATE DATABASE sat character set UTF8mb4 collate utf8mb4_bin;"
+      - name: Composer setup
+        run: composer config http-basic.nova.laravel.com ${{ secrets.NOVA_USERNAME }} ${{ secrets.NOVA_PASSWORD }}
+      - name: Install Composer dependencies
+        run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+      - name: Setup app key
+        run: php artisan key:generate --force
+      - name: Setup database
+        run: php artisan migrate:fresh
+      - name: Run unit tests
+        run: php artisan test
